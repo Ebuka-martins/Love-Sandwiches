@@ -1,47 +1,47 @@
 import gspread
 from google.oauth2.service_account import Credentials
 
-
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive"
-    ]
+]
 
 CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('love_sandwiches')
 
+
 def get_sales_data():
     """
-    Get sales figures input from the users
+    Get sales figures input from the user.
     Run a while loop to collect a valid string of data from the user
-    via the terminal, which must be a string of 6 numbers seperated
-    by commas. The loop will repeatedly request data, until it is valid
-    CSV(COMMA SEPERATED VALUE)
+    via the terminal, which must be a string of 6 numbers separated
+    by commas. The loop will repeatedly request data until it is valid
+    CSV (Comma Separated Values).
     """
-
     while True:
-         print("please enter sales data from the last market.")
-         print("Data should be six numbers seperated by commas.")
-         print("Examples: 10,20,30,40,50,60")
+        print("Please enter sales data from the last market.")
+        print("Data should be six numbers separated by commas.")
+        print("Example: 10,20,30,40,50,60")
 
-         data_str = input("Enter your data here:\n ")
+        data_str = input("Enter your data here:\n ")
 
-         sales_data = data_str.split(",")
+        sales_data = data_str.split(",")
 
-         if validate_data(sales_data):
+        if validate_data(sales_data):
             print("Data is valid!")
-            break     
+            break
 
-    return sales_data    
+    return sales_data
+
 
 def validate_data(values):
     """
-    Inside the try, converts all strings values into integers.
-    Raises valueError if strings cannot be converted into int,
-    or if there aren't exactly 6 figures
+    Inside the try, converts all string values into integers.
+    Raises ValueError if strings cannot be converted into int,
+    or if there aren't exactly 6 figures.
     """
     try:
         [int(value) for value in values]
@@ -51,11 +51,10 @@ def validate_data(values):
             )
     except ValueError as e:
         print(f"Invalid data: {e}, please try again.\n")
-        return False    
+        return False
+
+    return True
     
-    return True  
-
-
 # def update_sales_worksheet(data):
 #     """
 #     update sales worksheet, add new row with the list data provided
@@ -77,12 +76,13 @@ def validate_data(values):
 #     surplus_worksheet.append_row(data)
 #     print("surplus worksheet update successfully")
 
+
 def update_worksheet(data, worksheet):
     """
-    Recieves a list of integers to be inserted into a worksheet
-    update the relevant worksheet with the data provided
-    """    
-    print(f"updating {worksheet} worksheet...\n")
+    Receives a list of integers to be inserted into a worksheet.
+    Updates the relevant worksheet with the data provided.
+    """
+    print(f"Updating {worksheet} worksheet...\n")
     worksheet_to_update = SHEET.worksheet(worksheet)
     worksheet_to_update.append_row(data)
     print(f"{worksheet} worksheet updated successfully\n")
@@ -90,12 +90,12 @@ def update_worksheet(data, worksheet):
 
 def calculate_surplus_data(sales_row):
     """
-    compare sales with stock and calculate the surplus for each item type.
+    Compare sales with stock and calculate the surplus for each item type.
     The surplus is defined as the sales figure subtracted from the stock:
-    - positive surplus indicates waste
-    - negative surplus indicates extra made when stock was sold out.
+    - Positive surplus indicates waste.
+    - Negative surplus indicates extra made when stock was sold out.
     """
-    print("calculating surplus data...\n")
+    print("Calculating surplus data...\n")
     stock = SHEET.worksheet("stock").get_all_values()
     stock_row = stock[-1]
 
@@ -104,29 +104,30 @@ def calculate_surplus_data(sales_row):
         surplus = int(stock) - sales
         surplus_data.append(surplus)
 
-    return surplus_data   
+    return surplus_data
+
 
 def get_last_5_entries_sales():
     """
-    collect columns of data from sales worksheet, collecting
-    the last 5 entries for each sandwich and returns the data as a list of lists
-    """    
+    Collect columns of data from the sales worksheet, collecting
+    the last 5 entries for each sandwich and return
+    the data as a list of lists.
+    """
     sales = SHEET.worksheet("sales")
-    # column = sales.col_values(3)
-    # print(column)
 
     columns = []
     for ind in range(1, 7):
         column = sales.col_values(ind)
         columns.append(column[-5:])
 
-    return columns 
-        
+    return columns
+
+
 def calculate_stock_date(data):
     """
-    calculate the average stock for each item type, adding 10%
-    """        
-    print("calculating stock data...\n")
+    Calculate the average stock for each item type, adding 10%.
+    """
+    print("Calculating stock data...\n")
     new_stock_data = []
 
     for column in data:
@@ -135,17 +136,14 @@ def calculate_stock_date(data):
         stock_num = average * 1.1
         new_stock_data.append(round(stock_num))
 
-    return new_stock_data    
-    
+    return new_stock_data
+
 
 def main():
     """
-    Run all program functions
-    ALSO IMMEDIATELY AFTER YOU WRITE MAIN() 
-    AND YOU PUT RUN.PY CODE, YOU PRESS CTRL C
-    AND PROCEED
+    Run all program functions.
     """
-    data = get_sales_data()    
+    data = get_sales_data()
     sales_data = [int(num) for num in data]
     update_worksheet(sales_data, "sales")
     new_surplus_data = calculate_surplus_data(sales_data)
@@ -153,8 +151,7 @@ def main():
     sales_columns = get_last_5_entries_sales()
     stock_data = calculate_stock_date(sales_columns)
     update_worksheet(stock_data, "stock")
-   
+
 
 print("Welcome to Love Sandwiches Data Automation")
 main()
-
