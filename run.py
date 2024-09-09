@@ -53,8 +53,7 @@ def validate_data(values):
         print(f"Invalid data: {e}, please try again.\n")
         return False
 
-    return True
-    
+    return True 
 # def update_sales_worksheet(data):
 #     """
 #     update sales worksheet, add new row with the list data provided
